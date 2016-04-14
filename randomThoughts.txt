@@ -1,0 +1,4 @@
+
+
+Step 2/3
+Selecting variants with a high variance will produce better clusters. I think PCA is going to be the best approach for this problem. Maybe we can do something clever to determine which variants have the largest variance without actualy computing the variance and then show a correlation... 
