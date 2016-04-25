@@ -24,10 +24,29 @@ G <- as.matrix(gRand, ncol=2188)
 genetic.matrix <- G[ , c(TRUE,FALSE)] + G[ , c(FALSE,TRUE)]
 var.covar <- var(genetic.matrix)
 
+
 #' Get groups per haplotype; two haplotypes (columns) per sample
 levels <- c("ASW", "CEU", "CHB", "CHS", "CLM", "FIN", "GBR", "IBS", "JPT", "LWK", "MXL", "PUR", "TSI", "YRI")
 haplogroups <- unlist(rep(sampdat$population, each=2),use.names=FALSE)
 
+#' Summarize over the ethnicities
+#genetic.matrix.full <- hapdat[ , c(TRUE,FALSE)] + hapdat[ , c(FALSE,TRUE)]
+#var.covar.full <- var(genetic.matrix.full)
+
+#' Full data for variance/covariance
+persongroups <- unlist(rep(sampdat$population, each=1),use.names=FALSE)
+d <- matrix(0.0, nrow = length(levels), ncol = length(levels))
+row.names(d) <- levels
+colnames(d) <- levels
+
+for( i in levels ) {
+    for ( j in levels) {
+        is <- i == persongroups
+        js <- j == persongroups
+        d[i,j] <- mean(var.covar[is, js])
+    }
+}
+d
 #' Compute Transition probabilities
 top <- G[1,]
 hapdat2 <-  rbind(G[-1,],top) #shift first row to bottom
@@ -41,10 +60,10 @@ trans <-sapply(levels, function(t){ #separate matrices based on groups
     c(init, tP) # add initial probability to top with transitions following
 })
 
-write.table(trans, "transition-probabilities_G.txt", row.names = FALSE, quote = FALSE)
+write.table(d, "var-covar_G.txt", quote = FALSE)
 
 #' Corrplot
 #+ cache=TRUE
 png("subsamp.png")
-corrplot(var.covar[1:10,1:10], method="color", order="hclust", addrect=1)
+corrplot(as.matrix(as.numeric(d)), method="color")
 dev.off()
