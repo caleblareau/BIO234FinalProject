@@ -23,7 +23,7 @@ function thinTransitions(path, transMat, n)
 end
 
 #simulate population from transitions matrix
-function simulatePopulation(transMat, levels, n)
+function simulatePopulation(transMat, levels, n, thin)
     sampinfo = levels[rand(1:end,n)]; # generate random ethnicity
     mat = Array(Int8,size(transMat)[1],n); #allocate empty array
     for k=1:length(levels)
@@ -46,7 +46,8 @@ function simulatePopulation(transMat, levels, n)
             end
         end
     end
-    return mat, sampinfo;
+    writedlm(string(path,"input/sim_", n, "_t", thin,".hap"), trans);
+    writedlm(string(path,"input/sim_", n, "_t", thin,".sample"), levels');
 end
 
 # Create MCT matrix
