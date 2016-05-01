@@ -14,27 +14,28 @@ function colMeans(arr)
 end
 
 # Thin samples
-function thinTransitions(path, transMat, n)
+function thinTransitions(transMat, n)
     head = transMat[1,:];
     tmean = map(colMeans,[transMat[i:i+n-1,:] for i=1:n:size(transMat)[1]-n+1])
     out = vcat(tmean...)
-    writedlm(string(path,"output/transitionMat_thinned", n, ".txt"), out);
+    writedlm(string(path,"output/transitionMat_t", n, ".txt"), out);
     return out;
 end
 
 #simulate population from transitions matrix
 function simulatePopulation(transMat, levels, n, thin)
     sampinfo = levels[rand(1:end,n)]; # generate random ethnicity
-    mat = Array(Int8,size(transMat)[1],n); #allocate empty array
+    mat = Array(Int8,size(transMat)[1],2*n); #allocate empty array
+    sampexpand = repeat(sampinfo,inner=[2])
     for k=1:length(levels)
         loc=levels[k]; 
-        idx = sampinfo.==loc;
+        idx = sampexpand.==loc;
         # populate first row using population proportion of zeros
         r = rand(sum(idx));
         idz = r.<=transMat[1,k];
         mat[1,idx]=idz;
         # populate subsequent rows using transition probabilities
-        for i=2:length(samp)
+        for i=2:size(mat)[1]
             r = rand(sum(idx));
             idz = r.<=transMat[i,k];
             for j=1:length(idz)
@@ -46,8 +47,8 @@ function simulatePopulation(transMat, levels, n, thin)
             end
         end
     end
-    writedlm(string(path,"input/sim_", n, "_t", thin,".hap"), trans);
-    writedlm(string(path,"input/sim_", n, "_t", thin,".sample"), levels');
+    writedlm(string(path,"input/sim_", n, "_t", thin,".hap"), mat);
+    writedlm(string(path,"input/sim_", n, "_t", thin,".sample"), sampinfo);
 end
 
 # Create MCT matrix

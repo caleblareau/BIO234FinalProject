@@ -5,7 +5,7 @@ from matplotlib.mlab import PCA
 import matplotlib.pyplot as plt
 import random 
 
-fl = 'sim_n1094_t0'
+fl = 'sim_600_t0'
 hapFile = '../input/'+fl+'.hap'
 phenoFile = '../input/'+fl+'.sample'
 
@@ -13,14 +13,16 @@ phenoFile = '../input/'+fl+'.sample'
 raw = []
 with open(hapFile,'r') as f:
    for line in f:
-      raw.append([ int (x) for x in line.split(' ') ])
+    #only read in about 1% of the variants
+    if(random.uniform(0,1) < 0.01):
+      raw.append([ int (x) for x in line.split('\t') ])
 
 #Read in ethnicity data
 pheno = []
-with open(phenoFile,'r') as f:
-    next(f)    
+with open(phenoFile,'r') as f: 
     for line in f:
-       pheno.append(line.split()[1])
+       pheno.append(line.split()[0])
+
 G = np.matrix(raw)
 
 #Number of variants per person per position (0,1,2)

@@ -12,16 +12,17 @@ end
 export MCT, ethnicity_key
 
 ## MCT expansion pseudocode
+
 import MCT, ethnicity_key
 
 n=number_individuals
-pop = matrix(NA,markers,n)
+pop = matrix(NA,markers,2*n)
 eth = random(ethnicity,n)
 foreach i in ethnicity
-    rand = random(0,1,length=n[eth==i])
+    rand = random(0,1,length=2*n[eth==i])
     start.state = rand <= MCT[1,i[eth==1]]
     foreach j in markers
-        rand = random(0,1,length=n[eth==i])
+        rand = random(0,1,length=2*n[eth==i])
         transitions[j] = rand <= MCT[j,i[eth==1]]
     end
 end
