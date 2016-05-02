@@ -1,10 +1,7 @@
 # get transition probabilities
 function getTransitions(loc)
     idx = haplogroup.==loc;
-    init = 1-sum(top[idx'])/sum(idx); #proportion of 0s in first position
-    tP = 1-sum(sameState[:,idx[1:end]],2)./sum(idx); #probability of transitioning to a different state
-    tP = tP[1:end-1]; #remove last row
-    cat(1, init, tP); # add initial probability to top with transitions following
+    tP = 1-sum(hapdat[:,idx[1:end]].==0,2)./sum(idx);#proportion of zeros
 end
 
 # Generic column means function
@@ -33,7 +30,7 @@ function thinTransitions(transMat, n)
     tmean = map(colMeans,[transMat[i:i+n-1,:] for i=2:n:size(transMat)[1]-n+1])
     out = vcat(tmean...)
     out = cat(1,head,out)
-    writedlm(string(path,"output/transitionMat_t", n, ".txt"), out);
+    writedlm(string(path,"output/transitionMat_00_t", n, ".txt"), out);
     return out;
 end
 
@@ -49,21 +46,15 @@ function simulatePopulation(transMat, levels, n, thin)
         r = rand(sum(idx));
         idz = 1-(r.<=transMat[1,k]);
         mat[1,idx]=idz;
-        # populate subsequent rows using transition probabilities
+        # populate subsequent rows using proportion of zeros
         for i=2:size(mat)[1]
             r = rand(sum(idx));
-            idz = r.<=transMat[i,k];
-            for j=1:length(idz)
-                if idz[j] == true
-                    mat[i,find(idx)[j]] = 1-mat[i-1,find(idx)[j]]; #transitions states
-                else 
-                    mat[i,find(idx)[j]] = mat[i-1,find(idx)[j]]; #does not transition states
-                end
-            end
+            idz = 1-(r.<=transMat[i,k]);
+            mat[i,idx] = idz; 
         end
     end
-    writedlm(string(path,"input/sim_", n, "_t", thin,".hap"), mat);
-    writedlm(string(path,"input/sim_", n, "_t", thin,".sample"), sampinfo);
+    writedlm(string(path,"input/sim0_", n, "_t", thin,".hap"), mat);
+    writedlm(string(path,"input/sim0_", n, "_t", thin,".sample"), sampinfo);
 end
 
 # Create MCT matrix
@@ -75,16 +66,10 @@ sampdat = readdlm(string(path, samp), Any, skipstart=1);
 levels = sort(unique(sampdat[:,2]));
 haplogroup = repeat(sampdat[:,2],inner=[2]);
 
-# Compute Transition probabilities
-top = copy(hapdat[1,:]);
-hapdat_shift =  cat(1,copy(hapdat[2:end,:]),top); #shift first row to bottom
-sameState = hapdat.==hapdat_shift;
-sameState = convert(Array{Uint8}, bitpack(sameState));
-
 map(superGroup,levels);
-levels = sort(unique(haplogroup));
+levels = sort(unique(sampdat));
 trans = map(getTransitions,levels);
 trans = hcat(trans...);
 
-writedlm(string(path,"output/transitionMat.txt"), trans);
-writedlm(string(path,"output/legend.txt"), levels');
+writedlm(string(path,"output/transitionMat_00.txt"), trans);
+writedlm(string(path,"output/legend_00.txt"), levels');

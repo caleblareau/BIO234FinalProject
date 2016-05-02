@@ -4,7 +4,7 @@ hap = "input/ALL_1000G_phase1interim_jun2011_chr20_impute.hap";
 samp = "input/ALL_1000G_phase1interim_jun2011.sample";
 legend = "input/ALL_1000G_phase1interim_jun2011_chr20_impute.legend";
 
-# time compression
+###### time markov chain compression ########
 @time include(string(path,"code/core.jl"));
 
 # time thinning
@@ -14,7 +14,7 @@ legend = "input/ALL_1000G_phase1interim_jun2011_chr20_impute.legend";
 @time trans100 = thinTransitions(trans,100);
 
 # time data regeneration
-sampsize = 100
+sampsize = 500
 @time trans = readdlm(string(path,"output/transitionMat.txt"), header=false);
 @time simulatePopulation(trans, levels, sampsize, 0)
 @time trans2 = readdlm(string(path,"output/transitionMat_t2.txt"), header=false);
@@ -25,3 +25,5 @@ sampsize = 100
 @time simulatePopulation(trans10, levels, sampsize, 10)
 @time trans100 = readdlm(string(path,"output/transitionMat_t100.txt"), header=false);
 @time simulatePopulation(trans100, levels, sampsize, 100)
+
+## PCA plotting is done with simPCA.py

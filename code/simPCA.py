@@ -5,7 +5,7 @@ from matplotlib.mlab import PCA
 import matplotlib.pyplot as plt
 import random 
 
-fl = 'sim_600_t0'
+fl = 'sim_500_t0'
 hapFile = '../input/'+fl+'.hap'
 phenoFile = '../input/'+fl+'.sample'
 
@@ -14,7 +14,7 @@ raw = []
 with open(hapFile,'r') as f:
    for line in f:
     #only read in about 1% of the variants
-    if(random.uniform(0,1) < 0.01):
+    if(random.uniform(0,1) < 1):
       raw.append([ int (x) for x in line.split('\t') ])
 
 #Read in ethnicity data
@@ -26,10 +26,12 @@ with open(phenoFile,'r') as f:
 G = np.matrix(raw)
 
 #Number of variants per person per position (0,1,2)
-geneticMatrix = np.zeros((G.shape[0],G.shape[1]/2))
+geneticMatrix = np.zeros((G.shape[0],round(G.shape[1]/2)))
+j=0
 for i in range(0,G.shape[1],2):
-    geneticMatrix[:,] = (G[:,i]+G[:,i+1])
-    
+    geneticMatrix[:,j:] = (G[:,i]+G[:,i+1])
+    j=j+1
+
 #Covariance Matrix
 genCov = np.cov(geneticMatrix, rowvar = 0)
 
